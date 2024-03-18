@@ -1,10 +1,12 @@
 "use client";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -16,6 +18,7 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    navigate("/upload");
   };
 
   return (

@@ -1,11 +1,12 @@
 "use client";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 
 export default function Signup() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -21,6 +22,7 @@ export default function Signup() {
       alert("Passwords do not match");
       return;
     }
+    navigate("/upload");
   };
 
   const handleConfirmPasswordChange = (e) => {
