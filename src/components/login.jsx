@@ -2,6 +2,7 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import axios from "axios";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -16,9 +17,35 @@ export default function Login() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate("/upload");
+
+    try {
+      // Send a POST request to your backend login endpoint
+      const response = await axios.post(
+        "https://snakcloud.onrender.com/login", // Update with your backend endpoint URL
+        { username, password } // Send username and password in the request body
+      );
+
+      // Assuming your backend returns a success status code (e.g., 200)
+      if (response.status === 200) {
+        // Extract JWT token from the response
+        const token = response.data.token;
+
+        // Store the token in local storage
+        localStorage.setItem("token", token);
+
+        // Redirect the user to the upload page upon successful login
+        navigate("/upload");
+      } else {
+        alert("Login Failed");
+        console.error("Login failed:", response.data); // Log the error
+      }
+    } catch (error) {
+      // Handle network errors or other exceptions
+      alert("Login Failed");
+      console.error("An error occurred:", error);
+    }
   };
 
   return (

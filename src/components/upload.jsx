@@ -1,5 +1,5 @@
-"use client";
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import icon from "./assets/icon.png";
 
 export default function Upload() {
@@ -13,23 +13,65 @@ export default function Upload() {
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-    // Do something with the selected file, such as displaying its name
     console.log("Selected file:", selectedFile.name);
-    setFileName(selectedFile.name); // Set the file name in state
-    setFileSelected(true); // Set fileSelected to true when a file is selected
+    setFileName(selectedFile.name);
+    setFileSelected(true);
   };
 
-  const handleUpload = () => {
-    // Perform upload logic here
-    console.log("File upload logic goes here");
-    // Reset fileSelected state after upload
-    setFileSelected(false);
-    setFileName(""); // Clear the file name after upload
+  const handleUpload = async () => {
+    const file = fileInputRef.current.files[0];
+    if (!file) {
+      alert("Please select a file.");
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const base64Data = reader.result.split(",")[1]; // Extract Base64 data
+        const requestData = {
+          fileName: file.name,
+          fileData: base64Data,
+        };
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          alert("Token not found. Please log in.");
+          return;
+        }
+
+        const response = await axios.post(
+          "https://snakcloud.onrender.com/uploadfile",
+          requestData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          const responseData = response.data;
+          console.log(responseData.link);
+          const downloadLink = responseData.downloadLink;
+          window.open(responseData.link, "_blank");
+          console.log("File uploaded to your API successfully");
+          setFileSelected(false);
+          setFileName("");
+        } else {
+          console.error("Failed to upload file to your API");
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-[#D87555] font-poppins">
-      <img className="m-4" src={icon}></img>
+      <img className="m-4" src={icon} alt="Icon" />
       <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white mb-8 rounded-3xl">
         <div className="text-5xl m-6 mt-12 font-semibold text-gray-700">
           Upload files to snakcloud

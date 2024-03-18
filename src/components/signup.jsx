@@ -1,6 +1,6 @@
-"use client";
 import { Link, useNavigate } from "react-router-dom";
 import React, { useState } from "react";
+import axios from "axios"; // Import axios for making HTTP requests
 
 export default function Signup() {
   const [username, setUsername] = useState("");
@@ -16,17 +16,40 @@ export default function Signup() {
     setPassword(e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if passwords match
     if (password !== confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    navigate("/upload");
-  };
 
-  const handleConfirmPasswordChange = (e) => {
-    setConfirmPassword(e.target.value);
+    try {
+      // Send a POST request to your backend signup endpoint
+      const response = await axios.post(
+        "https://snakcloud.onrender.com/signup", // Update with your backend endpoint URL
+        { username, password } // Send username and password in the request body
+      );
+
+      // Assuming your backend returns a success status code (e.g., 201)
+      // Redirect the user to the login page upon successful signup
+      if (response.status === 201) {
+        navigate("/upload");
+      } else {
+        alert("Signup Failed");
+        // Handle other response statuses or errors if needed
+        console.error("Signup failed:", response.data); // Log the error
+      }
+    } catch (error) {
+      alert("Signup Failed");
+      // Handle network errors or other exceptions
+      console.error("An error occurred:", error);
+    }
   };
 
   return (
@@ -43,7 +66,7 @@ export default function Signup() {
           <div className="flex flex-col text-xs ">
             <p className="mb-1 mt-1">Have an account?</p>
             <span className="text-yellow-500">
-              <Link to="/Login">Sign in</Link>
+              <Link to="/login">Sign in</Link>
             </span>
           </div>
         </div>
