@@ -6,6 +6,7 @@ export default function Upload() {
   const fileInputRef = useRef(null);
   const [fileSelected, setFileSelected] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [fileLink, setFileLink] = useState("");
 
   const handleFileSelect = () => {
     fileInputRef.current.click();
@@ -54,11 +55,10 @@ export default function Upload() {
         if (response.status === 200) {
           const responseData = response.data;
           console.log(responseData.link);
-          const downloadLink = responseData.downloadLink;
-          window.open(responseData.link, "_blank");
+          setFileLink(responseData.link); // Set the file link
+          setFileSelected(true); // Ensure file selection state is updated
+          setFileName(file.name); // Set the file name
           console.log("File uploaded to your API successfully");
-          setFileSelected(false);
-          setFileName("");
         } else {
           console.error("Failed to upload file to your API");
         }
@@ -69,11 +69,39 @@ export default function Upload() {
     }
   };
 
+  const handleDownload = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Token not found. Please log in.");
+      return;
+    }
+
+    const headers = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    axios
+      .get(fileLink, { headers, responseType: "blob" })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert("Failed to download file.");
+      });
+  };
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-[#D87555] font-poppins">
       <img className="m-4" src={icon} alt="Icon" />
       <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white mb-8 rounded-3xl">
-        <div className="text-5xl m-6 mt-12 font-semibold text-gray-700">
+        <div className="text-5xl m-6 mt-12 font-semibold text-black">
           Upload files to snakcloud
         </div>
         <div className="text-2xl text-gray-700">
@@ -89,6 +117,14 @@ export default function Upload() {
         {fileSelected && (
           <p className="mt-4 text-gray-700">Selected file: {fileName}</p>
         )}
+        {fileLink && (
+          <p className="mt-4 text-gray-700">
+            File uploaded:{" "}
+            <a href={fileLink} target="_blank" rel="noopener noreferrer">
+              {fileName}
+            </a>
+          </p>
+        )}
         <button
           type="submit"
           className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-16 text-lg font-medium shadow-md"
@@ -96,6 +132,15 @@ export default function Upload() {
         >
           {fileSelected ? "Upload" : "Select file"}
         </button>
+        {fileLink && (
+          <button
+            type="button"
+            className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-4 text-lg font-medium shadow-md"
+            onClick={handleDownload}
+          >
+            Download
+          </button>
+        )}
       </div>
     </div>
   );
