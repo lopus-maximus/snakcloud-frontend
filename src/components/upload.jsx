@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import icon from "./assets/icon.png";
 
@@ -7,6 +7,37 @@ export default function Upload() {
   const [fileSelected, setFileSelected] = useState(false);
   const [fileName, setFileName] = useState("");
   const [fileLink, setFileLink] = useState("");
+  const [files, setFiles] = useState([]);
+  const [uploading, setUploading] = useState(false); // New state for tracking upload process
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
+  const fetchFiles = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Token not found. Please log in.");
+        return;
+      }
+
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await axios.get(
+        "https://snakcloud.onrender.com/files/all",
+        { headers }
+      );
+      if (response.status === 200) {
+        setFiles(response.data.files);
+      } else {
+        console.error("Failed to fetch files.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 
   const handleFileSelect = () => {
     fileInputRef.current.click();
@@ -25,6 +56,8 @@ export default function Upload() {
       alert("Please select a file.");
       return;
     }
+
+    setUploading(true);
 
     try {
       const reader = new FileReader();
@@ -59,6 +92,7 @@ export default function Upload() {
           setFileSelected(true); // Ensure file selection state is updated
           setFileName(file.name); // Set the file name
           console.log("File uploaded to your API successfully");
+          setUploading(false);
         } else {
           console.error("Failed to upload file to your API");
         }
@@ -69,7 +103,7 @@ export default function Upload() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = (downloadLink, fileName) => {
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Token not found. Please log in.");
@@ -81,7 +115,7 @@ export default function Upload() {
     };
 
     axios
-      .get(fileLink, { headers, responseType: "blob" })
+      .get(downloadLink, { headers, responseType: "blob" })
       .then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
@@ -100,37 +134,20 @@ export default function Upload() {
   return (
     <div className="flex flex-col items-center justify-center w-full h-screen bg-[#D87555] font-poppins">
       <img className="m-4" src={icon} alt="Icon" />
-      <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white mb-8 rounded-3xl">
+      <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white  rounded-t-3xl">
         <div className="text-5xl m-6 mt-12 font-semibold text-black">
           Upload files to snakcloud
         </div>
         <div className="text-2xl text-gray-700">
           Where storage knows no bounds
         </div>
-        <input
-          type="file"
-          accept=".pdf,.doc,.docx"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          className="hidden"
-        />
-        {fileSelected && (
-          <p className="mt-4 text-gray-700">Selected file: {fileName}</p>
-        )}
-        {fileLink && (
-          <p className="mt-4 text-gray-700">
-            File uploaded:{" "}
-            <a href={fileLink} target="_blank" rel="noopener noreferrer">
-              {fileName}
-            </a>
-          </p>
-        )}
         <button
           type="submit"
-          className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-16 text-lg font-medium shadow-md"
+          className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-8 text-lg font-medium shadow-md"
           onClick={fileSelected ? handleUpload : handleFileSelect}
+          disabled={uploading} // Disable button while uploading
         >
-          {fileSelected ? "Upload" : "Select file"}
+          {uploading ? "Uploading..." : fileSelected ? "Upload" : "Select file"}
         </button>
         {fileLink && (
           <button
@@ -141,6 +158,27 @@ export default function Upload() {
             Download
           </button>
         )}
+        <input
+          type="file"
+          accept=".pdf,.doc,.docx"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        {fileSelected && (
+          <p className="mt-4 text-gray-700">Selected file: {fileName}</p>
+        )}
+        <div className="file-list mt-4 w-full max-w-lg">
+          {files.slice().reverse().map((file, index) => (
+            <div
+              key={index}
+              className="file-item border rounded-md p-2 cursor-pointer hover:bg-gray-100 mt-2"
+              onClick={() => handleDownload(file.downloadLink, file.fileName)}
+            >
+              <p className="text-gray-700 break-words">{file.fileName}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
