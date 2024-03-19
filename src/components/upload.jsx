@@ -98,13 +98,13 @@ export default function Upload() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-screen bg-[#D87555] font-poppins">
+    <div className="flex flex-col items-center w-full h-screen bg-[#D87555] font-poppins">
       <img className="m-4" src={icon} alt="Icon" />
-      <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white mb-8 rounded-3xl">
-        <div className="text-5xl m-6 mt-12 font-semibold text-black">
+      <div className="flex flex-col items-center h-5/6 w-5/6 bg-white rounded-3xl">
+        <div className="text-5xl m-6 mt-12 font-semibold text-black text-center">
           Upload files to snakcloud
         </div>
-        <div className="text-2xl text-gray-700">
+        <div className="text-2xl text-gray-700 text-center">
           Where storage knows no bounds
         </div>
         <input
@@ -127,7 +127,7 @@ export default function Upload() {
         )}
         <button
           type="submit"
-          className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-16 text-lg font-medium shadow-md"
+          className="w-5/6 lg:w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-16 text-lg font-medium shadow-md"
           onClick={fileSelected ? handleUpload : handleFileSelect}
         >
           {fileSelected ? "Upload" : "Select file"}
@@ -135,7 +135,7 @@ export default function Upload() {
         {fileLink && (
           <button
             type="button"
-            className="w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-4 text-lg font-medium shadow-md"
+            className="w-5/6 lg:w-1/5 border text-white bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 rounded-xl p-3 mt-4 text-lg font-medium shadow-md"
             onClick={handleDownload}
           >
             Download
