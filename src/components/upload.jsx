@@ -132,13 +132,13 @@ export default function Upload() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full h-screen bg-[#D87555] font-poppins">
+    <div className="flex flex-col items-center w-full h-screen bg-[#D87555] font-poppins">
       <img className="m-4" src={icon} alt="Icon" />
       <div className="flex flex-col items-center w-[80rem] h-[32rem] bg-white  rounded-t-3xl">
         <div className="text-5xl m-6 mt-12 font-semibold text-black">
           Upload files to snakcloud
         </div>
-        <div className="text-2xl text-gray-700">
+        <div className="text-2xl text-gray-700 text-center">
           Where storage knows no bounds
         </div>
         <button
